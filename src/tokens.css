@@ -1,0 +1,113 @@
+:root,
+:root[data-theme="light"] {
+  /* surfaces */
+  --bg-canvas: #F4F5F3;      /* faint sage paper, not clinical white */
+  --bg-elevated: #FFFFFF;
+  --bg-sunken: #EDEFEA;
+  --bg-inset: #F7F8F6;
+  --border-hair: #E2E5DF;
+  --border-strong: #C9CEC5;
+
+  /* text */
+  --text-primary: #131712;
+  --text-secondary: #4C544C;
+  --text-tertiary: #7B847B;
+  --text-inverse: #F4F5F3;
+
+  /* brand */
+  --brand-600: #166534;      /* emerald — primary action, "vacant" family */
+  --brand-500: #16A34A;
+  --brand-300: #86EFAC;
+  --brand-100: #DCFCE7;
+  --brand-050: #F0FDF4;
+
+  /* accents */
+  --violet-500: #7C3AED;     /* reserved / hold */
+  --violet-100: #EDE9FE;
+  --cyan-400: #06B6D4;       /* you / self */
+  --amber-500: #D97706;      /* checked-in, in-house */
+  --amber-100: #FEF3C7;
+  --orange-500: #EA580C;     /* validity ending soon */
+  --red-600: #B91C1C;        /* conflict, locked, lapsed */
+  --red-100: #FEE2E2;
+  --slate-500: #64748B;      /* blocked / maintenance */
+
+  /* fonts */
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-ui: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* elevation & motion */
+  --shadow-1: 0 1px 2px rgb(19 23 18 / 0.06);
+  --shadow-2: 0 8px 24px -8px rgb(19 23 18 / 0.18);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 320ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root[data-theme="dark"] {
+  --bg-canvas: #080B09;
+  --bg-elevated: #0F1412;
+  --bg-sunken: #0B100D;
+  --bg-inset: #141A17;
+  --border-hair: #1E2621;
+  --border-strong: #2C372F;
+
+  --text-primary: #E8EFE9;
+  --text-secondary: #A3B1A6;
+  --text-tertiary: #6E7C72;
+  --text-inverse: #080B09;
+
+  --brand-500: #22C55E;
+  --brand-600: #15803D;
+  --brand-300: #86EFAC;
+  --brand-100: #0F2417;
+  --brand-050: #08140D;
+
+  --amber-400: #FBBF24;
+  --amber-500: #D97706;
+  --amber-100: #2A2008;
+
+  --red-500: #F87171;
+  --red-600: #B91C1C;
+  --red-100: #2A0D0D;
+
+  --violet-400: #A78BFA;
+  --violet-500: #7C3AED;
+  --violet-100: #1B1533;
+
+  --orange-500: #EA580C;
+  --slate-500: #64748B;
+  --cyan-400: #06B6D4;
+
+  --shadow-1: 0 1px 3px rgb(0 0 0 / 0.35);
+  --shadow-2: 0 8px 30px rgb(0 0 0 / 0.55);
+}
+
+body {
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+}
+
+.seat-code {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.num-hero {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(2rem, 7vw, 4.5rem);
+  line-height: 0.95;
+}
+
+.count {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}

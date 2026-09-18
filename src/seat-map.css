@@ -1,0 +1,234 @@
+/* Ashraya Seat Map System Styles - Spec 2.design.md §2.8 */
+
+.seat {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 8px;
+  border: 1.5px solid var(--s-border, var(--border-hair));
+  background-color: var(--s-bg, var(--bg-elevated));
+  display: grid;
+  place-items: center;
+  min-inline-size: 28px;
+  min-block-size: 28px;
+  cursor: pointer;
+  user-select: none;
+  transition: transform var(--dur-fast) var(--ease-out), background-color var(--dur-base), border-color var(--dur-base), box-shadow var(--dur-fast);
+}
+
+.seat[data-status="vacant"] {
+  --s-bg: #DCFCE7;
+  --s-border: #86EFAC;
+  --s-glyph: "✓";
+  --s-text: #166534;
+}
+
+.seat[data-status="reserved"] {
+  --s-bg: #EDE9FE;
+  --s-border: #C4B5FD;
+  --s-glyph: "●";
+  --s-text: #6D28D9;
+}
+
+.seat[data-status="occupied"] {
+  --s-bg: #FEF3C7;
+  --s-border: #F59E0B;
+  --s-glyph: "▲";
+  --s-text: #B45309;
+  background-image: repeating-linear-gradient(45deg, transparent 0 4px, rgba(245, 158, 11, 0.22) 4px 5px);
+}
+
+.seat[data-status="expiring"] {
+  --s-bg: #FFEDD5;
+  --s-border: #EA580C;
+  --s-glyph: "⚠";
+  --s-text: #C2410C;
+}
+
+.seat[data-status="lapsed"] {
+  --s-bg: #FEE2E2;
+  --s-border: #B91C1C;
+  --s-glyph: "✕";
+  --s-text: #991B1B;
+  background-image: repeating-linear-gradient(45deg, transparent 0 3px, rgba(185, 28, 28, 0.18) 3px 4px);
+}
+
+.seat[data-status="blocked"] {
+  --s-bg: #E2E8F0;
+  --s-border: #94A3B8;
+  --s-glyph: "🔧";
+  --s-text: #475569;
+}
+
+.seat[data-status="yours"] {
+  --s-bg: #CFFAFE;
+  --s-border: #06B6D4;
+  --s-glyph: "★";
+  --s-text: #0E7490;
+}
+
+.seat[data-status="offered"] {
+  --s-bg: #F3E8FF;
+  --s-border: #A855F7;
+  --s-glyph: "⏳";
+  --s-text: #7E22CE;
+  background-image: repeating-linear-gradient(-45deg, transparent 0 4px, rgba(168, 85, 247, 0.25) 4px 6px);
+}
+
+/* Dark theme status adaptations */
+:root[data-theme="dark"] .seat[data-status="vacant"] {
+  --s-bg: #0F2417;
+  --s-border: #22C55E;
+  --s-text: #86EFAC;
+}
+
+:root[data-theme="dark"] .seat[data-status="reserved"] {
+  --s-bg: #1B1533;
+  --s-border: #8B5CF6;
+  --s-text: #DDD6FE;
+}
+
+:root[data-theme="dark"] .seat[data-status="occupied"] {
+  --s-bg: #2A2008;
+  --s-border: #F59E0B;
+  --s-text: #FDE68A;
+  background-image: repeating-linear-gradient(45deg, transparent 0 4px, rgba(251, 191, 36, 0.26) 4px 5px);
+}
+
+:root[data-theme="dark"] .seat[data-status="expiring"] {
+  --s-bg: #2A1608;
+  --s-border: #EA580C;
+  --s-text: #FDBA74;
+}
+
+:root[data-theme="dark"] .seat[data-status="lapsed"] {
+  --s-bg: #2A0D0D;
+  --s-border: #EF4444;
+  --s-text: #FCA5A5;
+}
+
+:root[data-theme="dark"] .seat[data-status="blocked"] {
+  --s-bg: #171E22;
+  --s-border: #64748B;
+  --s-text: #94A3B8;
+}
+
+:root[data-theme="dark"] .seat[data-status="yours"] {
+  --s-bg: #08252B;
+  --s-border: #06B6D4;
+  --s-text: #67E8F9;
+}
+
+/* Zone Accents: 3px left indicator bar */
+.seat[data-zone="ac"]::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 3px;
+  inset-block: 5px;
+  width: 3px;
+  border-radius: 2px;
+  background: #0EA5E9;
+}
+
+.seat[data-zone="girls"]::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 3px;
+  inset-block: 5px;
+  width: 3px;
+  border-radius: 2px;
+  background: #DB2777;
+}
+
+.seat[data-zone="pod"]::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 3px;
+  inset-block: 5px;
+  width: 3px;
+  border-radius: 2px;
+  background: #7C3AED;
+}
+
+.seat[data-zone="regular"]::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 3px;
+  inset-block: 5px;
+  width: 3px;
+  border-radius: 2px;
+  background: #64748B;
+}
+
+/* Hover, Focus, and Animations */
+.seat:is(:hover, :focus-visible) {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: var(--shadow-2);
+  z-index: 5;
+}
+
+.seat:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--bg-canvas), 0 0 0 4px var(--brand-500);
+}
+
+.seat[data-flash="conflict"] {
+  animation: seatShake 320ms var(--ease-spring), flashConflict 960ms steps(1);
+}
+
+.seat[data-live="changed"] {
+  animation: seatPop 400ms var(--ease-spring);
+}
+
+@keyframes seatPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); box-shadow: 0 0 0 3px var(--brand-300); }
+  100% { transform: scale(1); }
+}
+
+@keyframes seatShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+
+@keyframes flashConflict {
+  0%, 33%, 66% { background-color: #B91C1C !important; border-color: #991B1B !important; }
+  16%, 50%, 83% { background-color: var(--s-bg); border-color: var(--s-border); }
+}
+
+/* 4-Quadrant Mode for All Shifts (Morning, Afternoon, Evening, Night) */
+.seat-quadrant-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.quadrant-cell {
+  display: grid;
+  place-items: center;
+  font-size: 8px;
+  font-weight: 600;
+  transition: opacity 150ms ease;
+  border: 0.5px solid rgba(0, 0, 0, 0.08);
+}
+
+.quadrant-cell[data-status="vacant"] { background: #DCFCE7; color: #166534; }
+.quadrant-cell[data-status="reserved"] { background: #EDE9FE; color: #6D28D9; }
+.quadrant-cell[data-status="occupied"] { background: #FEF3C7; color: #B45309; }
+.quadrant-cell[data-status="expiring"] { background: #FFEDD5; color: #C2410C; }
+.quadrant-cell[data-status="lapsed"] { background: #FEE2E2; color: #991B1B; }
+.quadrant-cell[data-status="blocked"] { background: #E2E8F0; color: #475569; }
+
+:root[data-theme="dark"] .quadrant-cell {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+:root[data-theme="dark"] .quadrant-cell[data-status="vacant"] { background: #0F2417; color: #86EFAC; }
+:root[data-theme="dark"] .quadrant-cell[data-status="reserved"] { background: #1B1533; color: #DDD6FE; }
+:root[data-theme="dark"] .quadrant-cell[data-status="occupied"] { background: #2A2008; color: #FDE68A; }
+:root[data-theme="dark"] .quadrant-cell[data-status="expiring"] { background: #2A1608; color: #FDBA74; }
+:root[data-theme="dark"] .quadrant-cell[data-status="lapsed"] { background: #2A0D0D; color: #FCA5A5; }
+:root[data-theme="dark"] .quadrant-cell[data-status="blocked"] { background: #171E22; color: #94A3B8; }

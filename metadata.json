@@ -1,0 +1,6 @@
+{
+  "name": "Ashraya",
+  "description": "Campus Library Seat Booking System with per-shift multi-occupancy, visual floor map, zero double-booking, QR check-in, and gate access control.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
