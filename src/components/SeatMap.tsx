@@ -3,7 +3,7 @@
  * Spec 2.design.md S1 & §5
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useDeferredValue } from 'react';
 import { Seat, Zone, Shift } from '../data/mockData.ts';
 import { SeatTile } from './SeatTile.tsx';
 import { Search, ZoomIn, ZoomOut, Maximize2, Users, AlertCircle, ShieldCheck } from 'lucide-react';
@@ -19,7 +19,7 @@ interface SeatMapProps {
   conflictingSeatCode?: string | null;
 }
 
-export const SeatMap: React.FC<SeatMapProps> = ({
+const SeatMapComponent: React.FC<SeatMapProps> = ({
   seats,
   zones,
   shifts,
@@ -30,22 +30,27 @@ export const SeatMap: React.FC<SeatMapProps> = ({
   conflictingSeatCode,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const deferredSearchQuery = useDeferredValue(searchQuery);
   const [selectedZoneFilter, setSelectedZoneFilter] = useState<string>('all');
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>('all');
   const [zoomLevel, setZoomLevel] = useState<number>(1);
 
-  const zoneMap = useMemo(() => {
-    const map = new Map<string, Zone>();
-    zones.forEach(z => map.set(z.id, z));
+  // Pre-index zone kind mapping for O(1) seat lookup
+  const zoneKindMap = useMemo(() => {
+    const map = new Map<string, 'ac' | 'regular' | 'girls' | 'pod'>();
+    zones.forEach(z => {
+      map.set(z.id, (z.kind || 'regular') as 'ac' | 'regular' | 'girls' | 'pod');
+    });
     return map;
   }, [zones]);
 
-  // Filter seats based on query, zone, and status
+  // Filter seats based on deferred query, zone, and status
   const filteredSeats = useMemo(() => {
+    const q = deferredSearchQuery.trim().toLowerCase();
+
     return seats.filter(seat => {
       // Search
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
+      if (q) {
         const matchesCode = seat.code.toLowerCase().includes(q);
         const occupants = Object.values(seat.occupants);
         const matchesOccupant = occupants.some(occ => occ?.name.toLowerCase().includes(q) || occ?.roll.toLowerCase().includes(q));
@@ -66,7 +71,7 @@ export const SeatMap: React.FC<SeatMapProps> = ({
 
       return true;
     });
-  }, [seats, searchQuery, selectedZoneFilter, selectedStatusFilter, activeShift]);
+  }, [seats, deferredSearchQuery, selectedZoneFilter, selectedStatusFilter, activeShift]);
 
   // Counts for legend & status bar
   const stats = useMemo(() => {
@@ -96,9 +101,9 @@ export const SeatMap: React.FC<SeatMapProps> = ({
   return (
     <div className="flex flex-col h-full bg-white dark:bg-[#0B100D] border border-slate-200 dark:border-[#1E2621] rounded-2xl shadow-sm overflow-hidden">
       {/* Top Controls Toolbar */}
-      <div className="p-3 border-b border-slate-200 dark:border-[#1E2621] bg-slate-50 dark:bg-[#0F1412] flex flex-wrap items-center justify-between gap-3">
+      <div className="p-3 border-b border-slate-200 dark:border-[#1E2621] bg-slate-50/80 dark:bg-[#0F1412] flex flex-wrap items-center justify-between gap-3">
         {/* Shift Segmented Control */}
-        <div className="flex items-center bg-slate-200 dark:bg-[#141A17] p-1 rounded-xl gap-1">
+        <div className="flex items-center bg-slate-200/80 dark:bg-[#141A17] p-1 rounded-xl gap-1">
           {(['morning', 'afternoon', 'evening', 'night', 'all'] as const).map(s => {
             const isActive = activeShift === s;
             return (
@@ -108,8 +113,8 @@ export const SeatMap: React.FC<SeatMapProps> = ({
                 onClick={() => onShiftChange(s)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-all capitalize ${
                   isActive
-                    ? 'bg-white dark:bg-[#22C55E] text-slate-900 dark:text-black shadow-sm font-bold'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                    ? 'bg-white text-slate-900 shadow-sm font-bold border border-slate-200/80 dark:bg-[#22C55E] dark:text-black dark:border-transparent'
+                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
                 }`}
               >
                 {s === 'all' ? 'All Shifts (4-Quadrant)' : s}
@@ -127,14 +132,14 @@ export const SeatMap: React.FC<SeatMapProps> = ({
               placeholder="Search seat (A-12) or student..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 text-xs bg-white dark:bg-[#141A17] border border-slate-300 dark:border-[#2C372F] rounded-lg text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full pl-8 pr-3 py-1.5 text-xs bg-white dark:bg-[#141A17] border border-slate-300 dark:border-[#2C372F] rounded-lg text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-xs"
             />
           </div>
 
           <select
             value={selectedZoneFilter}
             onChange={e => setSelectedZoneFilter(e.target.value)}
-            className="text-xs py-1.5 px-2 bg-white dark:bg-[#141A17] border border-slate-300 dark:border-[#2C372F] rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none"
+            className="text-xs py-1.5 px-2 bg-white dark:bg-[#141A17] border border-slate-300 dark:border-[#2C372F] rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none shadow-xs"
           >
             <option value="all">All Zones</option>
             {zones.map(z => (
@@ -146,7 +151,7 @@ export const SeatMap: React.FC<SeatMapProps> = ({
             <select
               value={selectedStatusFilter}
               onChange={e => setSelectedStatusFilter(e.target.value)}
-              className="text-xs py-1.5 px-2 bg-white dark:bg-[#141A17] border border-slate-300 dark:border-[#2C372F] rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none"
+              className="text-xs py-1.5 px-2 bg-white dark:bg-[#141A17] border border-slate-300 dark:border-[#2C372F] rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none shadow-xs"
             >
               <option value="all">All Statuses</option>
               <option value="vacant">Vacant</option>
@@ -161,38 +166,38 @@ export const SeatMap: React.FC<SeatMapProps> = ({
           <div className="flex items-center gap-1 border-l border-slate-300 dark:border-[#2C372F] pl-2">
             <button
               onClick={() => setZoomLevel(z => Math.max(0.7, z - 0.1))}
-              className="p-1 hover:bg-slate-200 dark:hover:bg-[#1E2621] rounded"
+              className="p-1 hover:bg-slate-200/70 dark:hover:bg-[#1E2621] rounded text-slate-600 dark:text-slate-400"
               title="Zoom out"
             >
-              <ZoomOut className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
+              <ZoomOut className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => setZoomLevel(1)}
-              className="p-1 hover:bg-slate-200 dark:hover:bg-[#1E2621] rounded"
+              className="p-1 hover:bg-slate-200/70 dark:hover:bg-[#1E2621] rounded text-slate-600 dark:text-slate-400"
               title="Reset view"
             >
-              <Maximize2 className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
+              <Maximize2 className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => setZoomLevel(z => Math.min(1.4, z + 0.1))}
-              className="p-1 hover:bg-slate-200 dark:hover:bg-[#1E2621] rounded"
+              className="p-1 hover:bg-slate-200/70 dark:hover:bg-[#1E2621] rounded text-slate-600 dark:text-slate-400"
               title="Zoom in"
             >
-              <ZoomIn className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
+              <ZoomIn className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
       </div>
 
       {/* Legend & Zone Ribbon */}
-      <div className="px-4 py-2 border-b border-slate-200 dark:border-[#1E2621] bg-slate-50/50 dark:bg-[#080B09] flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div className="px-4 py-2 border-b border-slate-200 dark:border-[#1E2621] bg-slate-50/60 dark:bg-[#080B09] flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-4 flex-wrap">
           <span className="font-semibold text-slate-700 dark:text-slate-300">Status:</span>
-          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-[#DCFCE7] dark:bg-[#0F2417] border border-[#86EFAC] dark:border-[#22C55E]"></span> Free ({stats.vacant || 0})</span>
-          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-[#EDE9FE] dark:bg-[#1B1533] border border-[#C4B5FD] dark:border-[#8B5CF6]"></span> Booked ({stats.reserved || 0})</span>
-          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-[#FEF3C7] dark:bg-[#2A2008] border border-[#F59E0B]"></span> In Now ({stats.occupied || 0})</span>
-          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-[#FFEDD5] dark:bg-[#2A1608] border border-[#EA580C]"></span> Ending (6)</span>
-          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-[#FEE2E2] dark:bg-[#2A0D0D] border border-[#EF4444]"></span> Lapsed (1)</span>
+          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-[#F0FDF4] dark:bg-[#0F2417] border border-[#BBF7D0] dark:border-[#22C55E]"></span> Free ({stats.vacant || 0})</span>
+          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-[#F5F3FF] dark:bg-[#1B1533] border border-[#DDD6FE] dark:border-[#8B5CF6]"></span> Booked ({stats.reserved || 0})</span>
+          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-[#FFFBEB] dark:bg-[#2A2008] border border-[#FCD34D] dark:border-[#F59E0B]"></span> In Now ({stats.occupied || 0})</span>
+          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-[#FFF7ED] dark:bg-[#2A1608] border border-[#FDBA74] dark:border-[#EA580C]"></span> Ending ({stats.expiring || 0})</span>
+          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-[#FEF2F2] dark:bg-[#2A0D0D] border border-[#FECACA] dark:border-[#EF4444]"></span> Lapsed ({stats.lapsed || 0})</span>
         </div>
 
         <div className="flex items-center gap-3 text-[11px] font-medium text-slate-500 dark:text-slate-400">
@@ -203,7 +208,7 @@ export const SeatMap: React.FC<SeatMapProps> = ({
       </div>
 
       {/* Main Floor Plan Grid */}
-      <div className="flex-1 overflow-auto p-6 bg-slate-100/60 dark:bg-[#080B09]">
+      <div className="flex-1 overflow-auto p-6 bg-slate-50/70 dark:bg-[#080B09]">
         <div
           className="mx-auto transition-transform duration-200"
           style={{
@@ -233,9 +238,8 @@ export const SeatMap: React.FC<SeatMapProps> = ({
             }}
           >
             {filteredSeats.map(seat => {
-              const zone = zoneMap.get(seat.zoneId) || zones.find(z => z.id === seat.zoneId) || zones[0];
               const zoneKind: 'ac' | 'regular' | 'girls' | 'pod' = (
-                zone?.kind ||
+                zoneKindMap.get(seat.zoneId) ||
                 (seat.zoneId.includes('ac') ? 'ac' : seat.zoneId.includes('girls') ? 'girls' : 'regular')
               );
               const isSelected = selectedSeat?.id === seat.id;
@@ -282,3 +286,5 @@ export const SeatMap: React.FC<SeatMapProps> = ({
     </div>
   );
 };
+
+export const SeatMap = React.memo(SeatMapComponent);

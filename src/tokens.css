@@ -1,45 +1,45 @@
 :root,
 :root[data-theme="light"] {
-  /* surfaces */
-  --bg-canvas: #F4F5F3;      /* faint sage paper, not clinical white */
+  /* surfaces - clean high-contrast modern palette */
+  --bg-canvas: #F8FAFC;
   --bg-elevated: #FFFFFF;
-  --bg-sunken: #EDEFEA;
-  --bg-inset: #F7F8F6;
-  --border-hair: #E2E5DF;
-  --border-strong: #C9CEC5;
+  --bg-sunken: #F1F5F9;
+  --bg-inset: #F8FAFC;
+  --border-hair: #E2E8F0;
+  --border-strong: #CBD5E1;
 
-  /* text */
-  --text-primary: #131712;
-  --text-secondary: #4C544C;
-  --text-tertiary: #7B847B;
-  --text-inverse: #F4F5F3;
+  /* text - deep slate with WCAG AAA readability */
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-tertiary: #94A3B8;
+  --text-inverse: #FFFFFF;
 
   /* brand */
-  --brand-600: #166534;      /* emerald — primary action, "vacant" family */
-  --brand-500: #16A34A;
-  --brand-300: #86EFAC;
-  --brand-100: #DCFCE7;
+  --brand-600: #059669;
+  --brand-500: #10B981;
+  --brand-300: #6EE7B7;
+  --brand-100: #ECFDF5;
   --brand-050: #F0FDF4;
 
   /* accents */
-  --violet-500: #7C3AED;     /* reserved / hold */
-  --violet-100: #EDE9FE;
-  --cyan-400: #06B6D4;       /* you / self */
-  --amber-500: #D97706;      /* checked-in, in-house */
+  --violet-500: #7C3AED;
+  --violet-100: #F3E8FF;
+  --cyan-400: #0284C7;
+  --amber-500: #D97706;
   --amber-100: #FEF3C7;
-  --orange-500: #EA580C;     /* validity ending soon */
-  --red-600: #B91C1C;        /* conflict, locked, lapsed */
+  --orange-500: #EA580C;
+  --red-600: #DC2626;
   --red-100: #FEE2E2;
-  --slate-500: #64748B;      /* blocked / maintenance */
+  --slate-500: #64748B;
 
   /* fonts */
-  --font-display: 'Space Grotesk', system-ui, sans-serif;
-  --font-ui: 'Inter', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-display: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-ui: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* elevation & motion */
-  --shadow-1: 0 1px 2px rgb(19 23 18 / 0.06);
-  --shadow-2: 0 8px 24px -8px rgb(19 23 18 / 0.18);
+  --shadow-1: 0 1px 3px 0 rgb(15 23 42 / 0.06), 0 1px 2px -1px rgb(15 23 42 / 0.04);
+  --shadow-2: 0 10px 15px -3px rgb(15 23 42 / 0.08), 0 4px 6px -4px rgb(15 23 42 / 0.04);
   --dur-fast: 120ms;
   --dur-base: 200ms;
   --dur-slow: 320ms;

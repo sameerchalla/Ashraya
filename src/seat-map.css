@@ -16,54 +16,51 @@
 }
 
 .seat[data-status="vacant"] {
-  --s-bg: #DCFCE7;
-  --s-border: #86EFAC;
-  --s-text: #166534;
+  --s-bg: #F0FDF4;
+  --s-border: #BBF7D0;
+  --s-text: #15803D;
 }
 
 .seat[data-status="reserved"] {
-  --s-bg: #EDE9FE;
-  --s-border: #C4B5FD;
+  --s-bg: #F5F3FF;
+  --s-border: #DDD6FE;
   --s-text: #6D28D9;
 }
 
 .seat[data-status="occupied"] {
-  --s-bg: #FEF3C7;
-  --s-border: #F59E0B;
+  --s-bg: #FFFBEB;
+  --s-border: #FCD34D;
   --s-text: #B45309;
-  background-image: repeating-linear-gradient(45deg, transparent 0 4px, rgba(245, 158, 11, 0.22) 4px 5px);
 }
 
 .seat[data-status="expiring"] {
-  --s-bg: #FFEDD5;
-  --s-border: #EA580C;
+  --s-bg: #FFF7ED;
+  --s-border: #FDBA74;
   --s-text: #C2410C;
 }
 
 .seat[data-status="lapsed"] {
-  --s-bg: #FEE2E2;
-  --s-border: #B91C1C;
-  --s-text: #991B1B;
-  background-image: repeating-linear-gradient(45deg, transparent 0 3px, rgba(185, 28, 28, 0.18) 3px 4px);
+  --s-bg: #FEF2F2;
+  --s-border: #FECACA;
+  --s-text: #B91C1C;
 }
 
 .seat[data-status="blocked"] {
-  --s-bg: #E2E8F0;
-  --s-border: #94A3B8;
-  --s-text: #475569;
+  --s-bg: #F8FAFC;
+  --s-border: #CBD5E1;
+  --s-text: #64748B;
 }
 
 .seat[data-status="yours"] {
-  --s-bg: #CFFAFE;
-  --s-border: #06B6D4;
-  --s-text: #0E7490;
+  --s-bg: #F0FDFA;
+  --s-border: #5EEAD4;
+  --s-text: #0F766E;
 }
 
 .seat[data-status="offered"] {
-  --s-bg: #F3E8FF;
-  --s-border: #A855F7;
+  --s-bg: #FAF5FF;
+  --s-border: #D8B4FE;
   --s-text: #7E22CE;
-  background-image: repeating-linear-gradient(-45deg, transparent 0 4px, rgba(168, 85, 247, 0.25) 4px 6px);
 }
 
 /* Dark theme status adaptations */
@@ -208,12 +205,12 @@
   border: 0.5px solid rgba(0, 0, 0, 0.08);
 }
 
-.quadrant-cell[data-status="vacant"] { background: #DCFCE7; color: #166534; }
-.quadrant-cell[data-status="reserved"] { background: #EDE9FE; color: #6D28D9; }
-.quadrant-cell[data-status="occupied"] { background: #FEF3C7; color: #B45309; }
-.quadrant-cell[data-status="expiring"] { background: #FFEDD5; color: #C2410C; }
-.quadrant-cell[data-status="lapsed"] { background: #FEE2E2; color: #991B1B; }
-.quadrant-cell[data-status="blocked"] { background: #E2E8F0; color: #475569; }
+.quadrant-cell[data-status="vacant"] { background: #F0FDF4; color: #15803D; }
+.quadrant-cell[data-status="reserved"] { background: #F5F3FF; color: #6D28D9; }
+.quadrant-cell[data-status="occupied"] { background: #FFFBEB; color: #B45309; }
+.quadrant-cell[data-status="expiring"] { background: #FFF7ED; color: #C2410C; }
+.quadrant-cell[data-status="lapsed"] { background: #FEF2F2; color: #B91C1C; }
+.quadrant-cell[data-status="blocked"] { background: #F8FAFC; color: #64748B; }
 
 :root[data-theme="dark"] .quadrant-cell {
   border-color: rgba(255, 255, 255, 0.08);

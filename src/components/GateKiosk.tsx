@@ -116,17 +116,21 @@ export const GateKiosk: React.FC<GateKioskProps> = ({ members }) => {
   return (
     <div
       id="gate-kiosk-container"
-      className="relative flex flex-col h-full bg-[#080B09] text-white p-6 rounded-3xl border border-[#1E2621] overflow-hidden select-none"
+      className="relative flex flex-col h-full bg-white dark:bg-[#080B09] text-slate-900 dark:text-white p-6 rounded-3xl border border-slate-200 dark:border-[#1E2621] shadow-lg overflow-hidden select-none transition-colors duration-200"
     >
       {/* Top Kiosk Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-[#1E2621]">
+      <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-[#1E2621]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-600/20 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400 font-bold font-display">
             G1
           </div>
           <div>
-            <h2 className="text-lg font-bold font-display tracking-tight">Main Entrance Turnstile — Gate 1</h2>
-            <p className="text-xs text-slate-400">Ashraya Access Controller · Hardware: ESP32 Relay</p>
+            <h2 className="text-lg font-bold font-display tracking-tight text-slate-900 dark:text-white">
+              Main Entrance Turnstile — Gate 1
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Ashraya Access Controller · Hardware: ESP32 Relay
+            </p>
           </div>
         </div>
 
@@ -136,11 +140,11 @@ export const GateKiosk: React.FC<GateKioskProps> = ({ members }) => {
             onClick={() => setIsOffline(o => !o)}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
               isOffline
-                ? 'bg-amber-950/60 text-amber-300 border-amber-800'
-                : 'bg-[#141A17] text-slate-300 border-[#2C372F]'
+                ? 'bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800'
+                : 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-[#141A17] dark:text-slate-300 dark:border-[#2C372F]'
             }`}
           >
-            {isOffline ? <WifiOff className="w-4 h-4 text-amber-400" /> : <Wifi className="w-4 h-4 text-emerald-400" />}
+            {isOffline ? <WifiOff className="w-4 h-4 text-amber-600 dark:text-amber-400" /> : <Wifi className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />}
             <span>{isOffline ? 'Offline Mode (Local Cache)' : 'Cloud Relay Online'}</span>
           </button>
         </div>
@@ -149,20 +153,20 @@ export const GateKiosk: React.FC<GateKioskProps> = ({ members }) => {
       {/* Main Kiosk Center View */}
       <div className="my-auto max-w-xl mx-auto w-full text-center space-y-5 py-4">
         {/* Optical Scanner Frame */}
-        <div className="w-56 h-56 mx-auto rounded-3xl border-2 border-dashed border-emerald-500/50 bg-[#0F1412] flex flex-col items-center justify-center p-4 relative shadow-2xl">
-          <Camera className="w-14 h-14 text-emerald-400/80 animate-pulse mb-2" />
-          <span className="text-sm font-semibold text-slate-200">Point QR Pass or Tap Card</span>
+        <div className="w-56 h-56 mx-auto rounded-3xl border-2 border-dashed border-emerald-500/60 bg-slate-50 dark:bg-[#0F1412] flex flex-col items-center justify-center p-4 relative shadow-md dark:shadow-2xl">
+          <Camera className="w-14 h-14 text-emerald-600 dark:text-emerald-400/80 animate-pulse mb-2" />
+          <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">Point QR Pass or Tap Card</span>
           <span className="text-xs text-slate-500 mt-1">Optical laser active · Auto-detection &lt;50ms</span>
 
           {/* Scanner Targeting Line */}
-          <div className="absolute inset-x-8 top-1/2 h-0.5 bg-emerald-400/80 shadow-[0_0_12px_#22c55e] animate-bounce"></div>
+          <div className="absolute inset-x-8 top-1/2 h-0.5 bg-emerald-500 shadow-[0_0_10px_#10b981] animate-bounce"></div>
         </div>
 
         {/* Quick Member RFID Tap Bar */}
-        <div className="bg-[#0F1412] p-4 rounded-2xl border border-[#1E2621] space-y-2.5">
-          <div className="flex items-center justify-between text-xs text-slate-400">
+        <div className="bg-slate-50/80 dark:bg-[#0F1412] p-4 rounded-2xl border border-slate-200 dark:border-[#1E2621] space-y-2.5">
+          <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
             <span className="font-semibold uppercase tracking-wider flex items-center gap-1.5">
-              <CreditCard className="w-3.5 h-3.5 text-emerald-400" />
+              <CreditCard className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
               <span>Tap Registered Member Pass</span>
             </span>
             <span className="text-[11px] text-slate-500 font-mono">RFID Reader Armed</span>
@@ -173,27 +177,27 @@ export const GateKiosk: React.FC<GateKioskProps> = ({ members }) => {
               <button
                 key={m.id}
                 onClick={() => evaluateMemberAccess(m)}
-                className="p-2 rounded-xl bg-[#141A17] hover:bg-[#1E2621] border border-[#2C372F] text-left transition-all active:scale-95 group flex items-center gap-2"
+                className="p-2 rounded-xl bg-white dark:bg-[#141A17] hover:bg-slate-100 dark:hover:bg-[#1E2621] border border-slate-200 dark:border-[#2C372F] text-left transition-all active:scale-95 group flex items-center gap-2 shadow-xs"
               >
                 {m.avatarUrl ? (
                   <img
                     src={m.avatarUrl}
                     alt={m.fullName}
                     referrerPolicy="no-referrer"
-                    className="w-7 h-7 rounded-lg object-cover border border-[#2C372F] shrink-0"
+                    className="w-7 h-7 rounded-lg object-cover border border-slate-200 dark:border-[#2C372F] shrink-0"
                   />
                 ) : (
-                  <div className="w-7 h-7 rounded-lg bg-emerald-600/20 text-emerald-400 font-bold text-xs flex items-center justify-center shrink-0">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-600/20 text-emerald-700 dark:text-emerald-400 font-bold text-xs flex items-center justify-center shrink-0">
                     {m.fullName.charAt(0)}
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <div className="font-bold text-slate-200 group-hover:text-emerald-400 truncate">
+                  <div className="font-bold text-slate-800 dark:text-slate-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 truncate">
                     {m.fullName}
                   </div>
-                  <div className="text-[10px] text-slate-400 flex items-center justify-between mt-0.5">
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center justify-between mt-0.5">
                     <span>{m.shiftName || 'Day'}</span>
-                    <span className={m.status === 'lapsed' ? 'text-red-400 font-semibold' : 'text-emerald-400'}>
+                    <span className={m.status === 'lapsed' ? 'text-red-600 dark:text-red-400 font-semibold' : 'text-emerald-600 dark:text-emerald-400'}>
                       {m.seatCode || m.status.toUpperCase()}
                     </span>
                   </div>
@@ -205,18 +209,18 @@ export const GateKiosk: React.FC<GateKioskProps> = ({ members }) => {
           {/* Manual Input (Roll Number / Phone / QR Token) */}
           <form onSubmit={handleManualCodeSubmit} className="pt-2 flex gap-2">
             <div className="relative flex-1">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-500" />
+              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400 dark:text-slate-500" />
               <input
                 type="text"
                 placeholder="Enter Roll No, Phone (+91...), or Student Name..."
                 value={scanInput}
                 onChange={e => setScanInput(e.target.value)}
-                className="w-full pl-8 pr-3 py-2 text-xs bg-[#141A17] border border-[#2C372F] rounded-xl text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono"
+                className="w-full pl-8 pr-3 py-2 text-xs bg-white dark:bg-[#141A17] border border-slate-300 dark:border-[#2C372F] rounded-xl text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono shadow-xs"
               />
             </div>
             <button
               type="submit"
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-xs font-bold rounded-xl text-white flex items-center gap-1.5 transition-colors"
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-xs font-bold rounded-xl text-white flex items-center gap-1.5 transition-colors shadow-sm"
             >
               <Scan className="w-3.5 h-3.5" />
               <span>Verify</span>
@@ -226,7 +230,7 @@ export const GateKiosk: React.FC<GateKioskProps> = ({ members }) => {
       </div>
 
       {/* Footer Info */}
-      <div className="pt-4 border-t border-[#1E2621] flex items-center justify-between text-xs text-slate-500 font-mono">
+      <div className="pt-4 border-t border-slate-200 dark:border-[#1E2621] flex items-center justify-between text-xs text-slate-500 font-mono">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <span>Device ID: TRN-GATE-01 · 12V Solenoid Armed</span>

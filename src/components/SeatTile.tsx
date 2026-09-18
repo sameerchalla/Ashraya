@@ -17,7 +17,7 @@ interface SeatTileProps {
   liveChanged?: boolean;
 }
 
-export const SeatTile: React.FC<SeatTileProps> = ({
+const SeatTileComponent: React.FC<SeatTileProps> = ({
   seat,
   activeShift,
   isSelected,
@@ -160,3 +160,5 @@ export const SeatTile: React.FC<SeatTileProps> = ({
     </div>
   );
 };
+
+export const SeatTile = React.memo(SeatTileComponent);
