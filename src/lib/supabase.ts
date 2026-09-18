@@ -3,7 +3,7 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Seat, Shift, Zone, Member, INITIAL_SHIFTS, INITIAL_ZONES, INITIAL_MEMBERS, generateInitialSeats } from '../data/mockData.ts';
+import { Seat, Shift, Zone, Member, DEFAULT_SHIFTS, DEFAULT_ZONES } from '../data/mockData.ts';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -115,7 +115,7 @@ export async function fetchLiveLibraryState(): Promise<LiveLibraryState | null> 
       return null;
     }
 
-    // Build shifts
+    // Build shifts dynamically from Supabase
     const shifts: Shift[] = (shiftsRes.data && shiftsRes.data.length > 0)
       ? shiftsRes.data.map(s => {
           const name = s.name;
@@ -135,9 +135,9 @@ export async function fetchLiveLibraryState(): Promise<LiveLibraryState | null> 
             bookedCount: bookingsRes.data?.filter(b => b.shift_id === s.id && b.status !== 'cancelled').length || 0,
           };
         })
-      : INITIAL_SHIFTS;
+      : DEFAULT_SHIFTS;
 
-    // Build zones
+    // Build zones dynamically from Supabase
     const zones: Zone[] = (zonesRes.data && zonesRes.data.length > 0)
       ? zonesRes.data.map(z => ({
           id: z.id,
@@ -146,12 +146,12 @@ export async function fetchLiveLibraryState(): Promise<LiveLibraryState | null> 
           color: z.color || '#64748B',
           genderRestriction: z.gender_restriction || 'any',
         }))
-      : INITIAL_ZONES;
+      : DEFAULT_ZONES;
 
-    // Build members
+    // Build members dynamically from Supabase with their active seat and shift
     const members: Member[] = (membersRes.data && membersRes.data.length > 0)
       ? membersRes.data.map(m => {
-          // Find their current booking if any
+          // Find member's active booking if any
           const memberBooking = bookingsRes.data?.find(b => b.member_id === m.id && b.status !== 'cancelled');
           return {
             id: m.id,
@@ -164,24 +164,41 @@ export async function fetchLiveLibraryState(): Promise<LiveLibraryState | null> 
             validTill: memberBooking?.end_date || '2026-12-31',
             seatCode: memberBooking?.seat?.code || undefined,
             shiftName: memberBooking?.shift?.name || undefined,
+            avatarUrl: m.photo_path || undefined,
           };
         })
-      : INITIAL_MEMBERS;
+      : [];
 
-    // Base initial seats
-    const initialSeats = generateInitialSeats();
-    const seatMapByCode = new Map(initialSeats.map(s => [s.code, s]));
+    // Build 240 seats purely from Supabase records
+    const seatMapByCode = new Map<string, Seat>();
 
-    // Match each Supabase seat record to UI seat structure
     seatsRes.data.forEach(dbSeat => {
-      const existing = seatMapByCode.get(dbSeat.code);
-      if (existing) {
-        existing.id = dbSeat.id; // use real Supabase UUID
-        if (dbSeat.zone_id) existing.zoneId = dbSeat.zone_id;
-      }
+      const parts = dbSeat.code.split('-');
+      const rowLetter = parts[0] || 'A';
+      const rowNo = dbSeat.row_no || (rowLetter.charCodeAt(0) - 64);
+      const colNo = dbSeat.col_no || parseInt(parts[1] || '1', 10);
+
+      seatMapByCode.set(dbSeat.code, {
+        id: dbSeat.id,
+        code: dbSeat.code,
+        rowNo,
+        colNo,
+        zoneId: dbSeat.zone_id || 'zone-reg',
+        isAvailable: dbSeat.is_active ?? true,
+        tags: dbSeat.tags && Array.isArray(dbSeat.tags) && dbSeat.tags.length > 0
+          ? dbSeat.tags
+          : (colNo === 1 || colNo === 20 ? ['near_window', 'socket'] : ['socket']),
+        shiftStatuses: {
+          morning: 'vacant',
+          afternoon: 'vacant',
+          evening: 'vacant',
+          night: 'vacant',
+        },
+        occupants: {},
+      });
     });
 
-    // Overlay active bookings on seats
+    // Overlay ONLY real active bookings from Supabase
     if (bookingsRes.data) {
       bookingsRes.data.forEach(bk => {
         if (bk.status === 'cancelled') return;
@@ -195,7 +212,7 @@ export async function fetchLiveLibraryState(): Promise<LiveLibraryState | null> 
           seat.shiftStatuses[shiftNameLower] = bk.status === 'checked_in' ? 'occupied' : 'reserved';
           seat.occupants[shiftNameLower] = {
             name: bk.member?.full_name || 'Registered Member',
-            roll: bk.member?.roll_no || 'REG',
+            roll: bk.member?.roll_no || '',
             validTill: bk.end_date,
           };
         }

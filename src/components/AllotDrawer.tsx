@@ -67,7 +67,7 @@ export const AllotDrawer: React.FC<AllotDrawerProps> = ({
       setConflictWarning(
         `Seat ${seat.code} (${targetShift?.name || selectedShiftName}) is currently held by ${occName} till ${occTill}.`
       );
-      setAlternatives(['C-08', 'D-14', 'E-02']);
+      setAlternatives([]);
       if (onConflictDetected) onConflictDetected(seat.code);
     } else {
       setConflictWarning(null);
@@ -77,7 +77,7 @@ export const AllotDrawer: React.FC<AllotDrawerProps> = ({
     setErrorMessage(null);
   }, [seat, selectedShiftName, targetShift, onConflictDetected]);
 
-  // Keyboard shortcut ⌘+Enter to submit
+  // Keyboard shortcut Ctrl+Enter or Cmd+Enter to submit
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
@@ -192,16 +192,41 @@ export const AllotDrawer: React.FC<AllotDrawerProps> = ({
           </select>
 
           {selectedMember && (
-            <div className="mt-2 p-2 bg-slate-50 dark:bg-[#141A17] border border-slate-200 dark:border-[#1E2621] rounded-lg text-xs flex items-center justify-between">
-              <div>
-                <span className="text-slate-500 dark:text-slate-400">Current Validity:</span>{' '}
-                <span className="font-semibold text-slate-800 dark:text-slate-200">{formatDisplayDate(selectedMember.validTill)}</span>
+            <div className="mt-2.5 p-3 bg-slate-50 dark:bg-[#141A17] border border-slate-200 dark:border-[#1E2621] rounded-xl text-xs flex items-center gap-3">
+              {selectedMember.avatarUrl ? (
+                <img
+                  src={selectedMember.avatarUrl}
+                  alt={selectedMember.fullName}
+                  referrerPolicy="no-referrer"
+                  className="w-10 h-10 rounded-lg object-cover border border-slate-300 dark:border-[#2C372F] shrink-0"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-lg bg-emerald-600/20 text-emerald-600 dark:text-emerald-400 font-bold flex items-center justify-center shrink-0">
+                  {selectedMember.fullName.charAt(0)}
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-900 dark:text-white truncate">
+                    {selectedMember.fullName}
+                  </span>
+                  <span
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                      selectedMember.status === 'active'
+                        ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400'
+                        : 'bg-red-100 text-red-700'
+                    }`}
+                  >
+                    {selectedMember.status}
+                  </span>
+                </div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                  {selectedMember.institute} · Roll: {selectedMember.rollNo}
+                </div>
+                <div className="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5">
+                  Valid till: <strong className="text-slate-900 dark:text-slate-100">{formatDisplayDate(selectedMember.validTill)}</strong>
+                </div>
               </div>
-              <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                selectedMember.status === 'active' ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400' : 'bg-red-100 text-red-700'
-              }`}>
-                {selectedMember.status}
-              </span>
             </div>
           )}
         </div>
@@ -230,7 +255,7 @@ export const AllotDrawer: React.FC<AllotDrawerProps> = ({
                 >
                   <div className="flex items-center justify-between capitalize">
                     <span>{s}</span>
-                    {hasOccupant && <span className="text-[10px] text-amber-500 font-semibold">● Taken</span>}
+                    {hasOccupant && <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">Occupied</span>}
                   </div>
                   <div className="text-[10px] text-slate-500 dark:text-slate-400 font-normal mt-0.5">
                     {sh ? `${sh.bookedCount}/${sh.capacity} filled` : '240 cap'}
@@ -293,7 +318,7 @@ export const AllotDrawer: React.FC<AllotDrawerProps> = ({
           ) : (
             <div className="p-2.5 bg-emerald-50 dark:bg-[#0F2417] border border-emerald-200 dark:border-emerald-800 rounded-xl text-xs flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-medium">
               <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <span>✓ Seat {seat.code} is available for {selectedShiftName} shift.</span>
+              <span>Seat {seat.code} is available for {selectedShiftName} shift.</span>
             </div>
           )}
 
@@ -338,7 +363,7 @@ export const AllotDrawer: React.FC<AllotDrawerProps> = ({
               ? 'Processing...' 
               : conflictWarning 
               ? 'Conflict — Slot Occupied' 
-              : 'Confirm Allotment (⌘↵)'}
+              : 'Confirm Allotment'}
           </span>
           <ArrowRight className="w-4 h-4" />
         </button>

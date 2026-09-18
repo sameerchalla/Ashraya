@@ -18,21 +18,18 @@
 .seat[data-status="vacant"] {
   --s-bg: #DCFCE7;
   --s-border: #86EFAC;
-  --s-glyph: "✓";
   --s-text: #166534;
 }
 
 .seat[data-status="reserved"] {
   --s-bg: #EDE9FE;
   --s-border: #C4B5FD;
-  --s-glyph: "●";
   --s-text: #6D28D9;
 }
 
 .seat[data-status="occupied"] {
   --s-bg: #FEF3C7;
   --s-border: #F59E0B;
-  --s-glyph: "▲";
   --s-text: #B45309;
   background-image: repeating-linear-gradient(45deg, transparent 0 4px, rgba(245, 158, 11, 0.22) 4px 5px);
 }
@@ -40,14 +37,12 @@
 .seat[data-status="expiring"] {
   --s-bg: #FFEDD5;
   --s-border: #EA580C;
-  --s-glyph: "⚠";
   --s-text: #C2410C;
 }
 
 .seat[data-status="lapsed"] {
   --s-bg: #FEE2E2;
   --s-border: #B91C1C;
-  --s-glyph: "✕";
   --s-text: #991B1B;
   background-image: repeating-linear-gradient(45deg, transparent 0 3px, rgba(185, 28, 28, 0.18) 3px 4px);
 }
@@ -55,21 +50,18 @@
 .seat[data-status="blocked"] {
   --s-bg: #E2E8F0;
   --s-border: #94A3B8;
-  --s-glyph: "🔧";
   --s-text: #475569;
 }
 
 .seat[data-status="yours"] {
   --s-bg: #CFFAFE;
   --s-border: #06B6D4;
-  --s-glyph: "★";
   --s-text: #0E7490;
 }
 
 .seat[data-status="offered"] {
   --s-bg: #F3E8FF;
   --s-border: #A855F7;
-  --s-glyph: "⏳";
   --s-text: #7E22CE;
   background-image: repeating-linear-gradient(-45deg, transparent 0 4px, rgba(168, 85, 247, 0.25) 4px 6px);
 }

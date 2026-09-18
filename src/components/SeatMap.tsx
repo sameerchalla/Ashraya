@@ -149,11 +149,11 @@ export const SeatMap: React.FC<SeatMapProps> = ({
               className="text-xs py-1.5 px-2 bg-white dark:bg-[#141A17] border border-slate-300 dark:border-[#2C372F] rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none"
             >
               <option value="all">All Statuses</option>
-              <option value="vacant">✓ Vacant</option>
-              <option value="occupied">▲ Occupied</option>
-              <option value="reserved">● Reserved</option>
-              <option value="expiring">⚠ Expiring</option>
-              <option value="lapsed">✕ Lapsed</option>
+              <option value="vacant">Vacant</option>
+              <option value="occupied">Occupied</option>
+              <option value="reserved">Reserved</option>
+              <option value="expiring">Expiring Soon</option>
+              <option value="lapsed">Lapsed</option>
             </select>
           )}
 
@@ -233,7 +233,11 @@ export const SeatMap: React.FC<SeatMapProps> = ({
             }}
           >
             {filteredSeats.map(seat => {
-              const zone = zoneMap.get(seat.zoneId) || zones[0];
+              const zone = zoneMap.get(seat.zoneId) || zones.find(z => z.id === seat.zoneId) || zones[0];
+              const zoneKind: 'ac' | 'regular' | 'girls' | 'pod' = (
+                zone?.kind ||
+                (seat.zoneId.includes('ac') ? 'ac' : seat.zoneId.includes('girls') ? 'girls' : 'regular')
+              );
               const isSelected = selectedSeat?.id === seat.id;
               const isConflict = conflictingSeatCode === seat.code;
 
@@ -243,7 +247,7 @@ export const SeatMap: React.FC<SeatMapProps> = ({
                   seat={seat}
                   activeShift={activeShift}
                   isSelected={isSelected}
-                  zoneKind={zone.kind}
+                  zoneKind={zoneKind}
                   onSelect={onSelectSeat}
                   flashConflict={isConflict}
                 />
@@ -266,8 +270,13 @@ export const SeatMap: React.FC<SeatMapProps> = ({
           <span className="text-amber-600 dark:text-amber-400 font-semibold">34 in waitlist queue</span>
         </div>
 
-        <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
-          Live sync: <span className="text-emerald-500 font-bold">● Active</span> (Supabase Realtime delta)
+        <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono flex items-center gap-1.5">
+          <span>Live sync:</span>
+          <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Active</span>
+          </span>
+          <span className="hidden sm:inline">(Supabase Realtime delta)</span>
         </div>
       </div>
     </div>

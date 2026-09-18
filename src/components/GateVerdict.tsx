@@ -9,6 +9,7 @@ import { ShieldCheck, ShieldAlert, WifiOff, Volume2, KeyRound } from 'lucide-rea
 interface GateVerdictProps {
   decision: 'open' | 'deny' | 'idle';
   memberName?: string;
+  memberAvatar?: string;
   seatCode?: string;
   shiftName?: string;
   reason?: string;
@@ -21,6 +22,7 @@ interface GateVerdictProps {
 export const GateVerdict: React.FC<GateVerdictProps> = ({
   decision,
   memberName,
+  memberAvatar,
   seatCode,
   shiftName,
   reason,
@@ -121,15 +123,26 @@ export const GateVerdict: React.FC<GateVerdictProps> = ({
               Relay Pulse 1.5s Active
             </div>
 
-            <div className="text-4xl sm:text-6xl font-bold tracking-tight">
+            {memberAvatar && (
+              <div className="flex justify-center">
+                <img
+                  src={memberAvatar}
+                  alt={memberName || 'Member'}
+                  referrerPolicy="no-referrer"
+                  className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border-2 border-emerald-300 shadow-xl"
+                />
+              </div>
+            )}
+
+            <div className="text-3xl sm:text-5xl font-bold tracking-tight">
               {memberName || 'Ravi Kumar'}
             </div>
 
-            <div className="flex items-center justify-center gap-4 text-lg sm:text-2xl font-semibold">
+            <div className="flex items-center justify-center gap-3 text-lg sm:text-2xl font-semibold">
               <span className="seat-code bg-white/20 px-3 py-1 rounded-xl">
                 Seat {seatCode || 'A-12'}
               </span>
-              <span>•</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-white/60"></span>
               <span className="text-emerald-200">
                 {shiftName || 'Morning'} Shift
               </span>
@@ -141,7 +154,18 @@ export const GateVerdict: React.FC<GateVerdictProps> = ({
           </div>
         ) : (
           <div className="bg-black/30 backdrop-blur-sm p-6 sm:p-8 rounded-3xl border border-white/20 shadow-2xl space-y-4">
-            <div className="text-2xl sm:text-4xl font-bold text-red-200">
+            {memberAvatar && (
+              <div className="flex justify-center">
+                <img
+                  src={memberAvatar}
+                  alt={memberName || 'Member'}
+                  referrerPolicy="no-referrer"
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-red-400 shadow-xl opacity-80"
+                />
+              </div>
+            )}
+
+            <div className="text-2xl sm:text-3xl font-bold text-red-200">
               {reason || 'Membership validity ended on 12 Sep. Ask front desk to renew.'}
             </div>
 

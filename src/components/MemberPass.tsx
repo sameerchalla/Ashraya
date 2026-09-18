@@ -11,12 +11,16 @@ import { formatDisplayDate, formatDurationMinutes } from '@ashraya/utils';
 interface MemberPassProps {
   member: Member;
   shift: Shift;
+  members?: Member[];
+  onSelectMember?: (member: Member) => void;
   onOpenReadOnlyMap: () => void;
 }
 
 export const MemberPass: React.FC<MemberPassProps> = ({
   member,
   shift,
+  members,
+  onSelectMember,
   onOpenReadOnlyMap,
 }) => {
   const [secondsRemaining, setSecondsRemaining] = useState<number>(55);
@@ -47,6 +51,44 @@ export const MemberPass: React.FC<MemberPassProps> = ({
         isBrightMode ? 'bg-white text-black' : ''
       }`}
     >
+      {/* Member Profile Switcher (for testing/demo) */}
+      {members && members.length > 0 && onSelectMember && (
+        <div className="mb-4 p-2.5 bg-white dark:bg-[#0F1412] rounded-2xl border border-slate-200 dark:border-[#1E2621]">
+          <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-2 flex items-center justify-between">
+            <span>Select Student Profile:</span>
+            <span className="font-mono text-[10px] text-emerald-600 dark:text-emerald-400">
+              {member.fullName} ({member.shiftName || 'Day'})
+            </span>
+          </div>
+          <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
+            {members.map(m => {
+              const isCurrent = m.id === member.id;
+              return (
+                <button
+                  key={m.id}
+                  onClick={() => onSelectMember(m)}
+                  className={`px-2.5 py-1 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 ${
+                    isCurrent
+                      ? 'bg-emerald-600 text-white shadow-sm'
+                      : 'bg-slate-100 dark:bg-[#141A17] text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#1E2621]'
+                  }`}
+                >
+                  {m.avatarUrl && (
+                    <img
+                      src={m.avatarUrl}
+                      alt={m.fullName}
+                      referrerPolicy="no-referrer"
+                      className="w-4 h-4 rounded-full object-cover"
+                    />
+                  )}
+                  <span>{m.fullName.split(' ')[0]}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Header Tag */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
@@ -74,6 +116,38 @@ export const MemberPass: React.FC<MemberPassProps> = ({
 
       {/* Main Pass Card */}
       <div className="bg-white dark:bg-[#0F1412] rounded-3xl border border-slate-200 dark:border-[#1E2621] shadow-xl overflow-hidden p-6 text-center relative">
+        {/* Student Identity Badge */}
+        <div className="flex items-center gap-3.5 mb-5 p-3 rounded-2xl bg-slate-50 dark:bg-[#141A17] border border-slate-200 dark:border-[#1E2621] text-left">
+          {member.avatarUrl ? (
+            <img
+              src={member.avatarUrl}
+              alt={member.fullName}
+              referrerPolicy="no-referrer"
+              className="w-13 h-13 sm:w-14 sm:h-14 rounded-xl object-cover border border-slate-300 dark:border-[#2C372F] shrink-0"
+            />
+          ) : (
+            <div className="w-13 h-13 rounded-xl bg-emerald-600/20 text-emerald-600 dark:text-emerald-400 font-bold text-lg flex items-center justify-center shrink-0">
+              {member.fullName.charAt(0)}
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-1">
+              <h3 className="font-bold text-sm text-slate-900 dark:text-white truncate">
+                {member.fullName}
+              </h3>
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 shrink-0">
+                {member.status}
+              </span>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-300 font-medium truncate">
+              {member.institute}
+            </p>
+            <p className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+              ID: {member.rollNo}
+            </p>
+          </div>
+        </div>
+
         {/* Rolling QR Code Canvas */}
         <div className="relative mx-auto w-56 h-56 bg-slate-50 dark:bg-[#141A17] p-3 rounded-2xl border border-slate-200 dark:border-[#2C372F] shadow-inner flex flex-col items-center justify-center">
           {useStaticFallback ? (

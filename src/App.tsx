@@ -3,12 +3,11 @@
  * Production Operational Console, Digital Pass & Gate Access Terminal
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   generateInitialSeats,
-  INITIAL_SHIFTS,
-  INITIAL_ZONES,
-  INITIAL_MEMBERS,
+  DEFAULT_SHIFTS,
+  DEFAULT_ZONES,
   Seat,
   Shift,
   Zone,
@@ -34,6 +33,7 @@ import {
   isSupabaseConfigured,
   checkSupabaseHealth,
   fetchLiveLibraryState,
+  supabase,
   SupabaseHealthStatus,
 } from './lib/supabase.ts';
 
@@ -41,46 +41,86 @@ export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [activeTab, setActiveTab] = useState<'console' | 'member' | 'gate'>('console');
 
-  // Core Application State
+  // Dynamic Application State (populated from live Supabase)
   const [seats, setSeats] = useState<Seat[]>(() => generateInitialSeats());
-  const [shifts, setShifts] = useState<Shift[]>(INITIAL_SHIFTS);
-  const [zones, setZones] = useState<Zone[]>(INITIAL_ZONES);
-  const [members, setMembers] = useState<Member[]>(INITIAL_MEMBERS);
+  const [shifts, setShifts] = useState<Shift[]>(DEFAULT_SHIFTS);
+  const [zones, setZones] = useState<Zone[]>(DEFAULT_ZONES);
+  const [members, setMembers] = useState<Member[]>([]);
   const [dbStatus, setDbStatus] = useState<SupabaseHealthStatus | null>(null);
-  const [isLoadingLive, setIsLoadingLive] = useState<boolean>(false);
+  const [isLoadingLive, setIsLoadingLive] = useState<boolean>(true);
 
   // Map & Drawer state
   const [activeShift, setActiveShift] = useState<'morning' | 'afternoon' | 'evening' | 'night' | 'all'>('morning');
   const [selectedSeat, setSelectedSeat] = useState<Seat | null>(null);
   const [conflictingSeatCode, setConflictingSeatCode] = useState<string | null>(null);
+  const [selectedMemberId, setSelectedMemberId] = useState<string>('');
 
   // Sync theme with document root
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  // Check Supabase connectivity & load live database state on mount
-  useEffect(() => {
-    if (isSupabaseConfigured) {
-      setIsLoadingLive(true);
-      checkSupabaseHealth().then(status => {
-        setDbStatus(status);
-      });
+  // Dynamic data synchronizer from Supabase
+  const loadLiveState = useCallback(async () => {
+    if (!isSupabaseConfigured) {
+      setIsLoadingLive(false);
+      return;
+    }
 
-      fetchLiveLibraryState().then(liveState => {
-        if (liveState) {
-          setSeats(liveState.seats);
-          setShifts(liveState.shifts);
-          setZones(liveState.zones);
-          setMembers(liveState.members);
-        }
-        setIsLoadingLive(false);
-      });
+    setIsLoadingLive(true);
+    try {
+      const [status, liveState] = await Promise.all([
+        checkSupabaseHealth(),
+        fetchLiveLibraryState(),
+      ]);
+
+      setDbStatus(status);
+
+      if (liveState) {
+        setSeats(liveState.seats);
+        setShifts(liveState.shifts);
+        setZones(liveState.zones);
+        setMembers(liveState.members);
+
+        setSelectedMemberId(prev => {
+          if (prev && liveState.members.some(m => m.id === prev)) return prev;
+          return liveState.members[0]?.id || '';
+        });
+      }
+    } catch (err) {
+      console.error('Failed to synchronize live library state:', err);
+    } finally {
+      setIsLoadingLive(false);
     }
   }, []);
 
+  // Initial load & real-time subscription
+  useEffect(() => {
+    loadLiveState();
+
+    if (supabase) {
+      const client = supabase;
+      const channel = client
+        .channel('library-db-realtime')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => {
+          loadLiveState();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'seats' }, () => {
+          loadLiveState();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'members' }, () => {
+          loadLiveState();
+        })
+        .subscribe();
+
+      return () => {
+        client.removeChannel(channel);
+      };
+    }
+  }, [loadLiveState]);
+
   // Handle Allotment Confirmation
-  const handleConfirmAllotment = (allotment: {
+  const handleConfirmAllotment = async (allotment: {
     seatId: string;
     seatCode: string;
     shiftId: string;
@@ -91,6 +131,7 @@ export default function App() {
   }) => {
     const shiftKey = allotment.shiftName.toLowerCase() as 'morning' | 'afternoon' | 'evening' | 'night';
 
+    // Optimistically update seat status
     setSeats(prev =>
       prev.map(seat => {
         if (seat.id === allotment.seatId || seat.code === allotment.seatCode) {
@@ -104,7 +145,7 @@ export default function App() {
               ...seat.occupants,
               [shiftKey]: {
                 name: allotment.memberName,
-                roll: 'REG-NEW',
+                roll: 'REG',
                 validTill: allotment.validTill,
               },
             },
@@ -113,10 +154,20 @@ export default function App() {
         return seat;
       })
     );
+
+    // Refresh state directly from Supabase DB to reflect real database counts and bindings
+    await loadLiveState();
   };
 
-  const currentMember = members[0] || INITIAL_MEMBERS[0];
-  const currentShift = shifts[0] || INITIAL_SHIFTS[0];
+  const currentMember =
+    members.find(m => m.id === selectedMemberId) ||
+    members[0] ||
+    null;
+
+  const currentShift =
+    shifts.find(s => s.name.toLowerCase() === currentMember?.shiftName?.toLowerCase()) ||
+    shifts[0] ||
+    null;
 
   return (
     <div className="min-h-screen bg-canvas text-primary flex flex-col font-sans selection:bg-brand-500 selection:text-white transition-colors duration-200">
@@ -189,8 +240,9 @@ export default function App() {
           {/* Right Status Indicator & Controls */}
           <div className="flex items-center gap-2 sm:gap-3 text-xs">
             {/* Supabase Connection Status Badge */}
-            <div
-              className={`flex items-center gap-1.5 font-mono text-[11px] px-2.5 py-1 rounded-xl border transition-colors ${
+            <button
+              onClick={() => loadLiveState()}
+              className={`flex items-center gap-1.5 font-mono text-[11px] px-2.5 py-1 rounded-xl border transition-all cursor-pointer hover:opacity-90 active:scale-95 ${
                 dbStatus?.connected
                   ? 'bg-emerald-50/80 dark:bg-[#0C1F14] text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50'
                   : isSupabaseConfigured
@@ -199,8 +251,8 @@ export default function App() {
               }`}
               title={
                 dbStatus?.connected
-                  ? `Supabase: Connected (${dbStatus.tablesCount?.seats || 240} seats, ${dbStatus.tablesCount?.bookings || 0} bookings)`
-                  : 'Supabase status'
+                  ? `Supabase: Connected (${dbStatus.tablesCount?.seats || 240} seats, ${dbStatus.tablesCount?.bookings || 0} bookings) · Click to sync`
+                  : 'Supabase status · Click to reconnect'
               }
             >
               <Database className="w-3 h-3" />
@@ -227,7 +279,7 @@ export default function App() {
                     : 'bg-slate-400'
                 }`}
               />
-            </div>
+            </button>
 
             {/* IST Clock */}
             <div className="hidden md:flex items-center gap-1.5 font-mono text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-[#141A17] px-2.5 py-1 rounded-xl border border-slate-200 dark:border-[#1E2621]">
@@ -266,20 +318,45 @@ export default function App() {
 
         {activeTab === 'member' && (
           <div className="py-6">
-            <MemberPass
-              member={currentMember}
-              shift={currentShift}
-              onOpenReadOnlyMap={() => setActiveTab('console')}
-            />
+            {currentMember && currentShift ? (
+              <MemberPass
+                member={currentMember}
+                shift={currentShift}
+                members={members}
+                onSelectMember={m => setSelectedMemberId(m.id)}
+                onOpenReadOnlyMap={() => setActiveTab('console')}
+              />
+            ) : (
+              <div className="max-w-md mx-auto p-12 text-center text-slate-500 font-mono text-sm bg-white dark:bg-[#0F1412] rounded-2xl border border-slate-200 dark:border-[#1E2621]">
+                <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-3 text-emerald-500" />
+                <div>Loading member pass from Supabase...</div>
+              </div>
+            )}
           </div>
         )}
 
         {activeTab === 'gate' && (
-          <div className="h-[calc(100vh-130px)]">
+          <div className="h-[calc(100vh-170px)] min-h-[580px]">
             <GateKiosk members={members} />
           </div>
         )}
       </main>
+
+      {/* Application Footer */}
+      <footer
+        id="app-footer"
+        className="mt-auto py-3.5 px-4 text-center border-t border-slate-200 dark:border-[#1E2621] bg-white/80 dark:bg-[#0F1412]/80 backdrop-blur-sm text-xs text-slate-500 dark:text-slate-400"
+      >
+        Built with ❤️ by{' '}
+        <a
+          href="https://www.linkedin.com/in/sameer-challa/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-semibold text-slate-800 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 underline decoration-slate-300 dark:decoration-slate-600 hover:decoration-emerald-500 transition-colors"
+        >
+          Sameer Challa
+        </a>
+      </footer>
 
       {/* Allotment Drawer Overlay */}
       {selectedSeat && (

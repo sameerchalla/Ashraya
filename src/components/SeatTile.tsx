@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { Seat } from '../data/mockData.ts';
+import { Check, Clock, User, AlertCircle, X, Wrench, Hourglass } from 'lucide-react';
 
 interface SeatTileProps {
   seat: Seat;
@@ -29,17 +30,25 @@ export const SeatTile: React.FC<SeatTileProps> = ({
   const currentStatus = isQuadrantMode ? 'vacant' : seat.shiftStatuses[activeShift];
   const currentOccupant = !isQuadrantMode ? seat.occupants[activeShift] : null;
 
-  // Glyph helper
-  const getGlyph = (status: string) => {
+  // Status icon component helper
+  const renderStatusIcon = (status: string) => {
     switch (status) {
-      case 'vacant': return '✓';
-      case 'reserved': return '●';
-      case 'occupied': return '▲';
-      case 'expiring': return '⚠';
-      case 'lapsed': return '✕';
-      case 'blocked': return '🔧';
-      case 'offered': return '⏳';
-      default: return '';
+      case 'vacant':
+        return <Check className="w-2.5 h-2.5 opacity-90 stroke-[2.5]" />;
+      case 'reserved':
+        return <Clock className="w-2.5 h-2.5 opacity-90 stroke-[2.5]" />;
+      case 'occupied':
+        return <User className="w-2.5 h-2.5 opacity-90 stroke-[2.5]" />;
+      case 'expiring':
+        return <AlertCircle className="w-2.5 h-2.5 opacity-90 stroke-[2.5]" />;
+      case 'lapsed':
+        return <X className="w-2.5 h-2.5 opacity-90 stroke-[2.5]" />;
+      case 'blocked':
+        return <Wrench className="w-2.5 h-2.5 opacity-90 stroke-[2.5]" />;
+      case 'offered':
+        return <Hourglass className="w-2.5 h-2.5 opacity-90 stroke-[2.5]" />;
+      default:
+        return null;
     }
   };
 
@@ -105,9 +114,9 @@ export const SeatTile: React.FC<SeatTileProps> = ({
       ) : (
         /* Single Shift View */
         <div className="flex flex-col items-center justify-center w-full h-full p-0.5">
-          <span className="text-[10px] font-bold leading-none opacity-80 mb-0.5">
-            {getGlyph(currentStatus)}
-          </span>
+          <div className="leading-none mb-0.5 flex items-center justify-center">
+            {renderStatusIcon(currentStatus)}
+          </div>
           <span className="seat-code text-[9px] font-semibold tracking-tighter leading-none opacity-90">
             {seat.code}
           </span>

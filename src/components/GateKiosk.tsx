@@ -19,6 +19,7 @@ export const GateKiosk: React.FC<GateKioskProps> = ({ members }) => {
   const [verdict, setVerdict] = useState<{
     decision: 'open' | 'deny' | 'idle';
     memberName?: string;
+    memberAvatar?: string;
     seatCode?: string;
     shiftName?: string;
     reason?: string;
@@ -35,6 +36,7 @@ export const GateKiosk: React.FC<GateKioskProps> = ({ members }) => {
       setVerdict({
         decision: 'deny',
         memberName: member.fullName,
+        memberAvatar: member.avatarUrl,
         reason: `Membership validity lapsed (${member.validTill || 'Expired'}). Please visit the admin desk to renew your seat pass.`,
         latencyMs: Date.now() - start + 48,
       });
@@ -45,6 +47,7 @@ export const GateKiosk: React.FC<GateKioskProps> = ({ members }) => {
       setVerdict({
         decision: 'deny',
         memberName: member.fullName,
+        memberAvatar: member.avatarUrl,
         reason: `Account status is ${member.status.toUpperCase()}. Pass currently restricted.`,
         latencyMs: Date.now() - start + 42,
       });
@@ -65,6 +68,7 @@ export const GateKiosk: React.FC<GateKioskProps> = ({ members }) => {
       setVerdict({
         decision: 'deny',
         memberName: `${member.fullName} (${member.shiftName} Shift)`,
+        memberAvatar: member.avatarUrl,
         reason: `Access restricted. Current active hall shift is ${currentShiftName}. Your assigned slot is ${member.shiftName}.`,
         latencyMs: Date.now() - start + 54,
       });
@@ -75,6 +79,7 @@ export const GateKiosk: React.FC<GateKioskProps> = ({ members }) => {
     setVerdict({
       decision: 'open',
       memberName: member.fullName,
+      memberAvatar: member.avatarUrl,
       seatCode: member.seatCode || 'Assigned Desk',
       shiftName: member.shiftName || currentShiftName,
       latencyMs: Date.now() - start + 38,
@@ -168,16 +173,30 @@ export const GateKiosk: React.FC<GateKioskProps> = ({ members }) => {
               <button
                 key={m.id}
                 onClick={() => evaluateMemberAccess(m)}
-                className="p-2 rounded-xl bg-[#141A17] hover:bg-[#1E2621] border border-[#2C372F] text-left transition-all active:scale-95 group"
+                className="p-2 rounded-xl bg-[#141A17] hover:bg-[#1E2621] border border-[#2C372F] text-left transition-all active:scale-95 group flex items-center gap-2"
               >
-                <div className="font-bold text-slate-200 group-hover:text-emerald-400 truncate">
-                  {m.fullName}
-                </div>
-                <div className="text-[10px] text-slate-400 flex items-center justify-between mt-0.5">
-                  <span>{m.shiftName || 'Day'}</span>
-                  <span className={m.status === 'lapsed' ? 'text-red-400 font-semibold' : 'text-emerald-400'}>
-                    {m.seatCode || m.status.toUpperCase()}
-                  </span>
+                {m.avatarUrl ? (
+                  <img
+                    src={m.avatarUrl}
+                    alt={m.fullName}
+                    referrerPolicy="no-referrer"
+                    className="w-7 h-7 rounded-lg object-cover border border-[#2C372F] shrink-0"
+                  />
+                ) : (
+                  <div className="w-7 h-7 rounded-lg bg-emerald-600/20 text-emerald-400 font-bold text-xs flex items-center justify-center shrink-0">
+                    {m.fullName.charAt(0)}
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-slate-200 group-hover:text-emerald-400 truncate">
+                    {m.fullName}
+                  </div>
+                  <div className="text-[10px] text-slate-400 flex items-center justify-between mt-0.5">
+                    <span>{m.shiftName || 'Day'}</span>
+                    <span className={m.status === 'lapsed' ? 'text-red-400 font-semibold' : 'text-emerald-400'}>
+                      {m.seatCode || m.status.toUpperCase()}
+                    </span>
+                  </div>
                 </div>
               </button>
             ))}
@@ -221,6 +240,7 @@ export const GateKiosk: React.FC<GateKioskProps> = ({ members }) => {
       <GateVerdict
         decision={verdict.decision}
         memberName={verdict.memberName}
+        memberAvatar={verdict.memberAvatar}
         seatCode={verdict.seatCode}
         shiftName={verdict.shiftName}
         reason={verdict.reason}
@@ -230,6 +250,7 @@ export const GateKiosk: React.FC<GateKioskProps> = ({ members }) => {
           setVerdict({
             decision: 'open',
             memberName: verdict.memberName,
+            memberAvatar: verdict.memberAvatar,
             seatCode: verdict.seatCode || 'A-12',
             shiftName: 'Security Override',
             latencyMs: 12,
